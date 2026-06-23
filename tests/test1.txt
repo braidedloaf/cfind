@@ -4,4 +4,10 @@ this is some text
 empty line ^^
 teXT THIS isS SSOme RealLY
 Unc00l text
-
+this is a pain
+p shoudl return
+this should not be shown
+P maybe
+#include "search.h"
+PAIN
+pain
