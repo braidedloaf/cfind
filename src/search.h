@@ -6,9 +6,19 @@
 
 typedef struct {
     size_t nline;
-    char line[256];
+    char line[4096];
+    char path[4096];
 } Result;
 
-size_t search_file(FILE *file, const char *text, size_t text_len, Result res[], size_t max_res);
+typedef struct {
+    int recursive;
+    int ignore_case;
+    int show_line_numbers;
+    int count_only;
+    int show_filename;
+} Options;
+
+
+size_t search_file(const char *filename, const char *needle, size_t needle_len, Result res[], size_t max_res, const Options *ops);
 
 #endif

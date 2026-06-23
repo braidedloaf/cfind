@@ -3,21 +3,38 @@
 #include "search.h"
 #include <string.h>
 
-size_t search_file(FILE *file, const char *text, size_t text_len, Result res[], size_t max_res) {
-    char line[256];
+size_t search_file(const char *path, const char *needle, size_t needle_len, Result res[], size_t max_res, const Options *ops) {
+    FILE *file = fopen(path, "r");
+    if (file == NULL) {
+        printf("Failed to open file :: %s", path);
+        return 1;
+    }
+
+    char line[4096];
     size_t res_count = 0;
 
+    size_t cur_line = 1;
     while (fgets(line, sizeof(line), file) != NULL) {
-        if (strlen(line) < text_len) {
+        if (strlen(line) < needle_len) {
             continue;
         }
         
-        for (int i = 0; line[i] != '\0' && i + text_len < strlen(line); i++) {
-            if (line[i] == text[0]) {
-                    
+        for (size_t i = 0; line[i] != '\0' && i + needle_len < strlen(line); i++) {
+            if (res_count < max_res) {
+                if (line[i] == needle[0]) {
+                    if (strncmp(line + i, needle, needle_len) == 0) {
+                        res[res_count] = (Result) { .nline = cur_line };
+                        snprintf(res[res_count].line, sizeof res[res_count].line, "%s", line); 
+                        snprintf(res[res_count].path, sizeof res[res_count].path, "%s", path); 
+
+                        res_count++;
+                    }
+                }    
             }
         }
+        cur_line++;
     }
-
-    return 0;
+    
+    fclose(file);
+    return res_count;
 }
