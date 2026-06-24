@@ -6,7 +6,7 @@
 size_t search_file(const char *path, const char *needle, size_t needle_len, Result res[], size_t max_res, const Options *ops) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
-        printf("Failed to open file :: %s", path);
+        printf("Failed to open file :: %s\n", path);
         return 1;
     }
 
@@ -23,11 +23,12 @@ size_t search_file(const char *path, const char *needle, size_t needle_len, Resu
             if (res_count < max_res) {
                 if (line[i] == needle[0]) {
                     if (strncmp(line + i, needle, needle_len) == 0) {
-                        res[res_count] = (Result) { .nline = cur_line };
+                        res[res_count] = (Result) {.nline = cur_line };
                         snprintf(res[res_count].line, sizeof res[res_count].line, "%s", line); 
                         snprintf(res[res_count].path, sizeof res[res_count].path, "%s", path); 
-
+                        
                         res_count++;
+                        break;
                     }
                 }    
             }
