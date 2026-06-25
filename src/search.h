@@ -15,7 +15,7 @@ typedef struct {
     int ignore_case;
     int show_line_numbers;
     int count_only;
-    int show_filename;
+    int no_filename;
 } Options;
 
 

@@ -1,6 +1,7 @@
 # Compiler settings
 CC := gcc
 CFLAGS := -Wall -Wextra -Wpedantic -std=c11 -MMD -MP
+CFLAGS += -D_POSIX_C_SOURCE=200809L
 
 # Directories
 SRC_DIR := src

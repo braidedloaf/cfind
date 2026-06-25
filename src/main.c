@@ -3,25 +3,58 @@
 #include "search.h"
 #include <dirent.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 int main(int argc, char **argv) {
     //printf("hello world!\n"); 
-    
+    size_t max_results = 4096;
     if (argc < 3) {
-        printf("Usage: %s <search_string> <file1/dir1> [file2/dir2...]\n", argv[0]);
+        printf("Usage: %s [options] <search_string> <file1/dir1> [file2/dir2...]\n", argv[0]);
         return 1;
     }
-    
+    Options ops = {0};
+    int op;
+    printf("argc = %d\n", argc);
+    for (int i = 0; i < argc; i++) {
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
+    while ((op = getopt(argc, argv, "rincf")) != -1) {
+        printf("opt : %c\n", op);
+        switch(op) {
+            case 'r':
+                ops.recursive = 1;
+                break;
 
-    //printf("Calling search with params ::\nSearch_string :: %s\nFilename :: %s\n", argv[1], argv[2]);
-    for (int i = 2; i < argc; i++) {
+            case 'i':
+                ops.ignore_case = 1;
+                break;
+
+            case 'n':
+                ops.show_line_numbers = 1;
+                break;
+
+            case 'c':
+                ops.count_only = 1;
+                break;
+
+            case 'f':
+                ops.no_filename = 1;
+                break;
+
+            default:
+                printf("default : %c", op);
+                return 1;
+
+        }
+    }
+    printf("%d %d", argc, -1);
+    for (int i = optind; i < argc; i++) {
         const char *path = argv[i];
-        
+        printf("first path: %s", path); 
         struct stat ist;
         stat(path, &ist);
         
         if (S_ISDIR(ist.st_mode)) {
-            //printf("%s is a directory\n", path);
             DIR *dir = opendir(path);
             if (dir == NULL) {
                 printf("Failed to open directory :: %s\n", path);
@@ -30,9 +63,7 @@ int main(int argc, char **argv) {
             
             struct dirent *entry;
             struct stat st;
-            //printf("not in while loop for %s\n", path);
             while ((entry = readdir(dir)) != NULL) {
-                //printf("curentry: %s\n", entry->d_name); 
                 if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
                     continue;
                 }
@@ -42,10 +73,10 @@ int main(int argc, char **argv) {
                 if (S_ISDIR(st.st_mode)) {
                     continue;
                 } else {           
-                    Result results[100];
+                    Result results[max_results];
                     char fullpath[4096];
                     snprintf(fullpath, sizeof fullpath, "%s/%s", path, entry->d_name);
-                    size_t res_cnt = search_file(fullpath, argv[1], strlen(argv[1]), results, 100, NULL);
+                    size_t res_cnt = search_file(fullpath, argv[optind], strlen(argv[optind]), results, max_results, &ops);
                     for (size_t j = 0; j < res_cnt; j++) {
                         printf("%s:%zu: %s", results[j].path, results[j].nline, results[j].line);
                     }
@@ -54,8 +85,8 @@ int main(int argc, char **argv) {
             closedir(dir);
         }
         else {
-            Result results[100];
-            size_t res_cnt = search_file(path, argv[1], strlen(argv[1]), results, 100, NULL);
+            Result results[max_results];
+            size_t res_cnt = search_file(path, argv[optind], strlen(argv[optind]), results, max_results, &ops);
             for (size_t j = 0; j < res_cnt; j++) {
                 printf("%s:%zu: %s", results[j].path, results[j].nline, results[j].line);
             }
