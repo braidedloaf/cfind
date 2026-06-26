@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include "search.h"
 #include <string.h>
+#include <ctype.h>
 
-size_t search_file(const char *path, const char *needle, size_t needle_len, Result res[], size_t max_res, const Options *ops) {
+int search_file(const char *path, char *needle, size_t needle_len, const Options *ops) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("Failed to open file :: %s\n", path);
@@ -18,18 +19,17 @@ size_t search_file(const char *path, const char *needle, size_t needle_len, Resu
         if (strlen(line) < needle_len) {
             continue;
         }
-        
         for (size_t i = 0; line[i] != '\0' && i + needle_len < strlen(line); i++) {
-            if (res_count < max_res) {
-                if (line[i] == needle[0]) {
-                    if (strncmp(line + i, needle, needle_len) == 0) {
-                        res[res_count] = (Result) {.nline = cur_line };
-                        snprintf(res[res_count].line, sizeof res[res_count].line, "%s", line); 
-                        snprintf(res[res_count].path, sizeof res[res_count].path, "%s", path); 
-                        
-                        res_count++;
-                        break;
-                    }
+            if (ops->ignore_case) {
+                strlwr(line);
+                strlwr(needle); 
+            }
+            if (line[i] == needle[0]) {
+                if (strncmp(line + i, needle, needle_len) == 0) {
+                    print_res(path, line, cur_line, res_count, ops); 
+                    
+                    res_count++;
+                    break;
                 }    
             }
         }
@@ -37,5 +37,20 @@ size_t search_file(const char *path, const char *needle, size_t needle_len, Resu
     }
     
     fclose(file);
-    return res_count;
+    return 0;
+}
+
+void print_res(const char *path, char *line, size_t nline, size_t results, const Options *ops) {
+    if (ops->no_filename) { //TODO implement
+    
+    }
+
+    printf("%s:%zu %s", path, nline, line);
+}
+
+void strlwr(char *str) {
+    while (*str) {
+        *str = tolower((unsigned char)*str);
+        str++;
+    }
 }
