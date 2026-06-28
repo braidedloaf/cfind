@@ -45,31 +45,8 @@ int main(int argc, char **argv) {
         const char *path = argv[i];
         struct stat ist;
         stat(path, &ist);
-        
         if (S_ISDIR(ist.st_mode)) {
-            DIR *dir = opendir(path);
-            if (dir == NULL) {
-                printf("Failed to open directory :: %s\n", path);
-                return 1;
-            }
-            
-            struct dirent *entry;
-            struct stat st;
-            while ((entry = readdir(dir)) != NULL) {
-                if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                    continue;
-                }
-                char fullpath[4096];
-                snprintf(fullpath, sizeof fullpath, "%s/%s", path, entry->d_name);
-                stat(fullpath, &st);
-                //TODO add check for recursive option
-                if (S_ISDIR(st.st_mode)) {
-                    continue;
-                } else {           
-                    search_file(fullpath, argv[optind], strlen(argv[optind]), &ops); 
-                }
-            }
-            closedir(dir);
+            search_dir(path, argv[optind], strlen(argv[optind]), &ops);
         }
         else {
             search_file(path, argv[optind], strlen(argv[optind]), &ops);

@@ -3,6 +3,8 @@
 #include "search.h"
 #include <string.h>
 #include <ctype.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 int search_file(const char *path, char *needle, size_t needle_len, const Options *ops) {
     FILE *file = fopen(path, "r");
@@ -40,12 +42,44 @@ int search_file(const char *path, char *needle, size_t needle_len, const Options
     return 0;
 }
 
-void print_res(const char *path, char *line, size_t nline, size_t results, const Options *ops) {
-    if (ops->no_filename) { //TODO implement
-    
+int search_dir(const char *path, char *needle, size_t needle_len, const Options *ops) {
+    DIR *dir = opendir(path);
+    if (dir == NULL) {
+        printf("Failed to open directory :: %s\n", path);
+        return 1;
     }
 
-    printf("%s:%zu %s", path, nline, line);
+    struct dirent *entry;
+    struct stat st;
+    while ((entry = readdir(dir)) != NULL) {
+        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+            continue;
+        }
+        char fullpath[4096];
+        snprintf(fullpath, sizeof fullpath, "%s/%s", path, entry->d_name);
+        stat(fullpath, &st);
+        //TODO add check for recursive option
+        if (S_ISDIR(st.st_mode) && ops->recursive) {
+            printf("is recuring with -r over %s\n", fullpath);
+            search_dir(fullpath, needle, needle_len, ops);
+        } else {           
+            search_file(fullpath, needle, needle_len, ops); 
+        }
+    }
+    closedir(dir);
+
+    
+    return 0;
+}
+
+
+void print_res(const char *path, char *line, size_t nline, size_t results, const Options *ops) {
+    if (ops->no_filename) { //TODO implement
+         
+    }
+    
+    
+    printf(strchr(line, '\n') != NULL ? "%s:%zu %s" : "%s:%zu %s\n", path, nline, line);
 }
 
 void strlwr(char *str) {
