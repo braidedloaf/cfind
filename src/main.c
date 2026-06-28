@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     }
     Options ops = {0};
     int op;
-    while ((op = getopt(argc, argv, "rincf")) != -1) {
+    while ((op = getopt(argc, argv, "rincv")) != -1) {
         switch(op) {
             case 'r':
                 ops.recursive = 1;
@@ -24,15 +24,15 @@ int main(int argc, char **argv) {
                 break;
 
             case 'n':
-                ops.no_line_numbers = 1;
+                ops.line_numbers = 1;
                 break;
 
             case 'c':
                 ops.count_only = 1;
                 break;
 
-            case 'f':
-                ops.no_filename = 1;
+            case 'v':
+                ops.invert_match = 1;
                 break;
 
             default:
@@ -41,15 +41,17 @@ int main(int argc, char **argv) {
 
         }
     }
+    size_t needle_len = strlen(argv[optind]);
     for (int i = optind+1; i < argc; i++) {
         const char *path = argv[i];
         struct stat ist;
         stat(path, &ist);
+        
         if (S_ISDIR(ist.st_mode)) {
-            search_dir(path, argv[optind], strlen(argv[optind]), &ops);
+            search_dir(path, argv[optind], needle_len, &ops);
         }
         else {
-            search_file(path, argv[optind], strlen(argv[optind]), &ops);
+            search_file(path, argv[optind], needle_len, &ops);
         }
         
     }

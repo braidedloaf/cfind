@@ -13,9 +13,9 @@ typedef struct {
 typedef struct {
     int recursive;
     int ignore_case;
-    int no_line_numbers;
+    int line_numbers;
     int count_only;
-    int no_filename;
+    int invert_match;
 } Options;
 
 
