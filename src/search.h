@@ -5,12 +5,6 @@
 #include <stddef.h>
 
 typedef struct {
-    size_t nline;
-    char line[4096];
-    char path[4096];
-} Result;
-
-typedef struct {
     int recursive;
     int ignore_case;
     int line_numbers;
