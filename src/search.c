@@ -6,7 +6,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-int search_file(const char *path, char *needle, size_t needle_len, const Options *ops) {
+int search_file(const char *path, const char *oneedle, size_t needle_len, const Options *ops) {
     FILE *file = fopen(path, "r");
     if (file == NULL) {
         printf("Failed to open file :: %s\n", path);
@@ -16,19 +16,28 @@ int search_file(const char *path, char *needle, size_t needle_len, const Options
     char line[4096];
     size_t res_count = 0;
     size_t not_count = 0;
-
+    
     size_t cur_line = 1;
+    //TODO make its own lwr needle change header to const char 
+    char needle[needle_len+1];
+    memcpy(needle, oneedle, needle_len);
+    needle[needle_len] = '\0';
+    if (ops->ignore_case) {
+        strlwr(needle);
+    }
+    
+
     while (fgets(line, sizeof(line), file) != NULL) {
         size_t line_len = strlen(line);
         if (line_len < needle_len) {
+            cur_line++;
             continue;
+        }
+        if (ops->ignore_case) {
+            strlwr(line);
         }
         int found = 0;
         for (size_t i = 0; line[i] != '\0' && i + needle_len < line_len; i++) {
-            if (ops->ignore_case) {
-                strlwr(line);
-                strlwr(needle); 
-            }
             if (line[i] == needle[0]) {
                 if (strncmp(line + i, needle, needle_len) == 0) {
                     if (!(ops->count_only) && !(ops->invert_match)) {
@@ -60,7 +69,7 @@ int search_file(const char *path, char *needle, size_t needle_len, const Options
     return 0;
 }
 
-int search_dir(const char *path, char *needle, size_t needle_len, const Options *ops) {
+int search_dir(const char *path, const char *needle, size_t needle_len, const Options *ops) {
     DIR *dir = opendir(path);
     if (dir == NULL) {
         printf("Failed to open directory :: %s\n", path);
@@ -107,3 +116,4 @@ void strlwr(char *str) {
         str++;
     }
 }
+
