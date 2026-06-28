@@ -77,7 +77,6 @@ int search_dir(const char *path, char *needle, size_t needle_len, const Options 
         snprintf(fullpath, sizeof fullpath, "%s/%s", path, entry->d_name);
         stat(fullpath, &st);
         if (S_ISDIR(st.st_mode) && ops->recursive) {
-            //printf("is recuring with -r over %s\n", fullpath);
             search_dir(fullpath, needle, needle_len, ops);
         } else {           
             search_file(fullpath, needle, needle_len, ops); 
@@ -85,7 +84,6 @@ int search_dir(const char *path, char *needle, size_t needle_len, const Options 
     }
     closedir(dir);
 
-    
     return 0;
 }
 
@@ -101,10 +99,6 @@ void print_res(const char *path, char *line, size_t nline, size_t results, const
         }
         printf("%s", line);
     }
-
-    //printf(strchr(line, '\n') != NULL ? "%s:%zu %s" : "%s:%zu %s\n", path, nline, line);
-
-
 }
 
 void strlwr(char *str) {

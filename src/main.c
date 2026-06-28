@@ -36,9 +36,8 @@ int main(int argc, char **argv) {
                 break;
 
             default:
-                printf("default : %c", op);
+                printf("Unknown flag : %c", op);
                 return 1;
-
         }
     }
     size_t needle_len = strlen(argv[optind]);
@@ -55,7 +54,6 @@ int main(int argc, char **argv) {
         }
         
     }
-
     
     return 0;
 }
